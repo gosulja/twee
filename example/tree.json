@@ -1,0 +1,10 @@
+[
+  {
+    "VariableDecl": [
+      "number",
+      {
+        "Number": 23.0
+      }
+    ]
+  }
+]
