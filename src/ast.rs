@@ -1,6 +1,6 @@
 use serde::Serialize;
 
-#[derive(Debug, Serialize)]
+#[derive(Debug, Clone, Serialize)]
 pub enum Expr {
     Identifier(String),
     Number(f64),
@@ -10,5 +10,12 @@ pub enum Expr {
 #[derive(Debug, Serialize)]
 pub enum Stmt {
     Expression(Expr),
-    VariableDecl(String, Expr),
+    VariableDecl(VariableDecl), /* name, value, type */
+}
+
+#[derive(Debug, Serialize)]
+pub struct VariableDecl {
+    pub name: String,
+    pub value: Expr,
+    pub type_annotation: String,
 }

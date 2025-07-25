@@ -8,6 +8,7 @@ pub enum TokenType {
     String,
     Equals,
     Local,
+    Colon,
     Semi,
     EOF,
 }
@@ -102,6 +103,11 @@ impl<'a> Lexer<'a> {
                 ';' => {
                     self.advance();
                     self.make(TokenType::Semi, ch.to_string())
+                }
+
+                ':' => {
+                    self.advance();
+                    self.make(TokenType::Colon, ch.to_string())
                 }
 
                 _ => {

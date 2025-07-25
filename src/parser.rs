@@ -1,4 +1,4 @@
-use crate::ast::{Expr, Stmt};
+use crate::ast::{Expr, Stmt, VariableDecl};
 use crate::lexer::*;
 
 pub struct TweeParser<'a> {
@@ -48,6 +48,9 @@ impl<'a> TweeParser<'a> {
 
         while !self.check(&TokenType::EOF) {
             stmts.push(self.parse_stmt()?);
+            if self.check(&TokenType::Semi) {
+                self.advance();
+            }
         }
 
         Ok(stmts)
@@ -57,7 +60,14 @@ impl<'a> TweeParser<'a> {
         match self.peek() {
             Some(token) => match token.token_type {
                 TokenType::Local => self.parse_local_declaration(),
-                _ => Ok(Stmt::Expression(self.parse_expr()?)),
+                _ => {
+                    let expr = Stmt::Expression(self.parse_expr()?);
+                    if self.check(&TokenType::Semi) {
+                        self.advance();
+                    }
+
+                    Ok(expr)
+                }
             },
 
             None => Err("[twee::error] unexpected end of input".to_string()),
@@ -78,13 +88,27 @@ impl<'a> TweeParser<'a> {
         /* Expect and consume an identifier, this is the variabels identifier. */
         let name = self.consume(TokenType::Identifier)?.lexeme;
 
+        /* Parse a type annotation, if none is present just imply the type. */
+        let type_annotation = if self.check(&TokenType::Colon) {
+            self.advance();
+
+            let type_str = self.consume(TokenType::Identifier)?.lexeme;
+            type_str
+        } else {
+            "any".to_string()
+        };
+
         /* Expect and consume an equals symbol. */
         self.consume(TokenType::Equals)?;
 
         /* Parse an expression for the value of the variable. */
         let value = self.parse_expr()?;
 
-        Ok(Stmt::VariableDecl(name, value))
+        Ok(Stmt::VariableDecl(VariableDecl {
+            name,
+            value,
+            type_annotation,
+        }))
     }
 
     /*
@@ -99,6 +123,14 @@ impl<'a> TweeParser<'a> {
                     self.advance();
 
                     Ok(Expr::Number(value))
+                }
+
+                /* Parse a reference to an identifier */
+                TokenType::Identifier => {
+                    let value = token.lexeme.clone();
+                    self.advance();
+
+                    Ok(Expr::Identifier(value))
                 }
 
                 /* Parse a string literal. */

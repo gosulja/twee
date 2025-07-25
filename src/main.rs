@@ -62,15 +62,16 @@ mod tests {
         assert_eq!(result.len(), 1);
 
         match &result[0] {
-            Stmt::VariableDecl(name, expr) => {
-                assert_eq!(name, "hello");
+            Stmt::VariableDecl(var_decl) => {
+                assert_eq!(var_decl.name, "hello");
+                assert_eq!(var_decl.type_annotation, "any");
 
-                match expr {
+                match var_decl.value.clone() {
                     Expr::String(value) => {
                         assert_eq!(value, "world!");
                     }
 
-                    _ => panic!("expected a string expression, got {:?}", expr),
+                    _ => panic!("expected a string expression, got {:?}", var_decl.value),
                 }
             }
 
@@ -86,5 +87,43 @@ mod tests {
         assert!(json.contains("hello"));
         assert!(json.contains("String"));
         assert!(json.contains("world!"));
+    }
+
+    #[test]
+    fn test_type_annotation_check_luau() {
+        let input = r#"local name: string = "blinx""#;
+
+        let lexer = Lexer::new(input);
+        let mut parser = TweeParser::new(lexer);
+        let result = parser.parse().unwrap();
+
+        assert_eq!(result.len(), 1);
+
+        match &result[0] {
+            Stmt::VariableDecl(var_decl) => {
+                assert_eq!(var_decl.name, "name");
+                assert_eq!(var_decl.type_annotation, "string");
+
+                match var_decl.value.clone() {
+                    Expr::String(value) => {
+                        assert_eq!(value, "blinx");
+                    }
+
+                    _ => panic!("expected a string expression, got {:?}", var_decl.value),
+                }
+            }
+
+            _ => {
+                panic!("expected a variable declaration, got {:?}", result[0]);
+            }
+        }
+
+        let json = serde_json::to_string_pretty(&result).unwrap();
+        println!("serialized:\n{}\n", json);
+
+        assert!(json.contains("VariableDecl"));
+        assert!(json.contains("name"));
+        assert!(json.contains("String"));
+        assert!(json.contains("string"));
     }
 }

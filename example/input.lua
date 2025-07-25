@@ -1,1 +1,0 @@
-local number = 23

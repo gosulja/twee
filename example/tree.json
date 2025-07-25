@@ -1,10 +1,11 @@
 [
-  {
-    "VariableDecl": [
-      "number",
-      {
-        "Number": 23.0
-      }
-    ]
-  }
+    {
+        "VariableDecl": {
+            "name": "num",
+            "value": {
+                "Number": 23.0
+            },
+            "type_annotation": "number"
+        }
+    }
 ]
