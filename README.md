@@ -18,11 +18,11 @@ Output:
 [
     {
         "VariableDecl": {
-            "name": "num",
+            "name": "name",
             "value": {
-                "Number": 23.0
+                "String": "blinx"
             },
-            "type_annotation": "number"
+            "type_annotation": "string"
         }
     }
 ]
