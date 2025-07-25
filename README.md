@@ -7,6 +7,27 @@ A Lua/Luau parser for code analysis and editor integration.
 * Allows for optional ';' after statements.
 * Serializes with proper key-pair value resolution.
 
+# example
+Test for type annotations for Luau source:
+```luau
+local name: string = "blinx"
+```
+
+Output:
+```json
+[
+    {
+        "VariableDecl": {
+            "name": "num",
+            "value": {
+                "Number": 23.0
+            },
+            "type_annotation": "number"
+        }
+    }
+]
+```
+
 # usage + test
 ```
 cargo test
