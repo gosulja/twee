@@ -1,4 +1,4 @@
-use crate::ast::{Expr, Stmt, VariableDecl};
+use crate::ast::{Binop, Expr, Stmt, VariableDecl};
 use crate::lexer::*;
 
 pub struct TweeParser<'a> {
@@ -115,6 +115,43 @@ impl<'a> TweeParser<'a> {
         Parse an ordinary expression.
     */
     fn parse_expr(&mut self) -> Result<Expr, String> {
+        self.parse_precedence(0) /* Start with parsing by preceden */
+    }
+
+    fn parse_precedence(&mut self, min: u8) -> Result<Expr, String> {
+        let mut left = self.parse_primary()?;
+
+        while let Some(op) = self.binop() {
+            let precedence = op.precedence();
+
+            if precedence < min {
+                break;
+            }
+
+            self.advance();
+
+            let right_min = if op.is_left_linked() {
+                precedence + 1
+            } else {
+                precedence
+            };
+
+            let right = self.parse_precedence(right_min)?;
+
+            left = Expr::BinaryOp {
+                left: Box::new(left),
+                op,
+                right: Box::new(right),
+            };
+        }
+
+        Ok(left)
+    }
+
+    /*
+        Parse primary expressions (literals, identifiers, and grouped expressions).
+    */
+    fn parse_primary(&mut self) -> Result<Expr, String> {
         match self.peek() {
             Some(token) => match token.token_type.clone() {
                 /* Parse a numeric literal. */
@@ -141,6 +178,14 @@ impl<'a> TweeParser<'a> {
                     Ok(Expr::String(value))
                 }
 
+                /* Parse parenthesized expressions */
+                TokenType::LParen => {
+                    self.advance(); // consume '('
+                    let expr = self.parse_expr()?;
+                    self.consume(TokenType::RParen)?; // consume ')'
+                    Ok(expr)
+                }
+
                 _ => Err(format!(
                     "[twee::error] unexpected token {:?}",
                     token.token_type
@@ -148,6 +193,23 @@ impl<'a> TweeParser<'a> {
             },
 
             None => Err("[twee::error] unexpected end of input".to_string()),
+        }
+    }
+
+    /*
+        Is the current token a binary operator? (add, sub, mul, div) if so return it as a binop.
+    */
+    fn binop(&self) -> Option<Binop> {
+        match self.peek() {
+            Some(tok) => match tok.token_type {
+                TokenType::Add => Some(Binop::Add),
+                TokenType::Sub => Some(Binop::Sub),
+                TokenType::Mul => Some(Binop::Mul),
+                TokenType::Div => Some(Binop::Div),
+                _ => None,
+            },
+
+            None => None,
         }
     }
 }

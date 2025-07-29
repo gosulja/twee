@@ -1,11 +1,27 @@
 [
-    {
-        "VariableDecl": {
-            "name": "num",
-            "value": {
-                "Number": 23.0
-            },
-            "type_annotation": "number"
+  {
+    "VariableDecl": {
+      "name": "x",
+      "value": {
+        "BinaryOp": {
+          "left": {
+            "Number": 2.0
+          },
+          "op": "Add",
+          "right": {
+            "BinaryOp": {
+              "left": {
+                "Number": 3.0
+              },
+              "op": "Mul",
+              "right": {
+                "Identifier": "five"
+              }
+            }
+          }
         }
+      },
+      "type_annotation": "any"
     }
+  }
 ]

@@ -1,3 +1,1 @@
-local num: number = 23;
-
--- print(num)
+local x = 2 + 3 * five

@@ -10,6 +10,12 @@ pub enum TokenType {
     Local,
     Colon,
     Semi,
+    Add,
+    Sub,
+    Mul,
+    Div,
+    LParen,
+    RParen,
     EOF,
 }
 
@@ -108,6 +114,36 @@ impl<'a> Lexer<'a> {
                 ':' => {
                     self.advance();
                     self.make(TokenType::Colon, ch.to_string())
+                }
+
+                '+' => {
+                    self.advance();
+                    self.make(TokenType::Add, ch.to_string())
+                }
+
+                '-' => {
+                    self.advance();
+                    self.make(TokenType::Sub, ch.to_string())
+                }
+
+                '/' => {
+                    self.advance();
+                    self.make(TokenType::Div, ch.to_string())
+                }
+
+                '*' => {
+                    self.advance();
+                    self.make(TokenType::Mul, ch.to_string())
+                }
+
+                '(' => {
+                    self.advance();
+                    self.make(TokenType::LParen, ch.to_string())
+                }
+
+                ')' => {
+                    self.advance();
+                    self.make(TokenType::RParen, ch.to_string())
                 }
 
                 _ => {
